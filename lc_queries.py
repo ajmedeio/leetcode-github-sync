@@ -15,6 +15,7 @@ query problemsetQuestionList($categorySlug: String, $limit: Int, $skip: Int, $fi
 }
 """
 
+
 def get_submission_list_query():
     return """
 query submissionList($offset: Int!, $limit: Int!, $lastKey: String, $questionSlug: String!, $lang: Int, $status: Int) {
@@ -44,6 +45,7 @@ query submissionList($offset: Int!, $limit: Int!, $lastKey: String, $questionSlu
   }
 }
 """
+
 
 def get_submission_details_query():
     return """
@@ -82,6 +84,8 @@ query submissionDetails($submissionId: Int!) {
   }
 }
 """
+
+
 def get_user_status_query():
     return """
 query globalData {

@@ -18,8 +18,6 @@ everything is containerized so there's no need to worry about dependencies. All 
 4. Select Cookies on the left panel
 5. Copy the value for LEETCODE_SESSION
 
-![](./assets/get_session_from_lc.png)
-
 ## Troubleshooting
 
 ```

@@ -9,6 +9,7 @@ set_logging()
 
 GH_API_HOST = "https://api.github.com"
 
+
 def create_new_repo(gh_api: GHApi, repo_name: str):
     create_repo = gh_api.create_repo(repo_name)
     if create_repo.status_code // 100 == 4:
@@ -19,6 +20,7 @@ def create_new_repo(gh_api: GHApi, repo_name: str):
         info(f"successfully created repo {repo_name}")
         return True
 
+
 def main():
     access_token = get_access_token()
     gh_api = GHApi(access_token=access_token)
@@ -26,7 +28,7 @@ def main():
     owner = user_info_json["login"]
     debug("owner", owner)
     gh_api.owner = owner
-    repo_name = input("Enter the repo name you want to sync to: ")
+    repo_name = "algos"
     get_repo = gh_api.get_repo(owner, repo_name)
     if get_repo.status_code == 404:
         ans = input(f"The repo {repo_name} doesn't exist. Create a new one? [y/n] ")
@@ -43,6 +45,12 @@ def main():
 
     gh_api.repo = repo_name
 
+    # filter out the questions we should sync
+    frontend_question_ids_to_sync_input = input("What frontend question IDs should we sync (comma delimited values)? ")
+    to_sync: set[str] = set(frontend_question_ids_to_sync_input.split(","))
+    for id in to_sync:
+        int(id)
+
     # query leetcode problems
     lc_api = LCApi()
     info("retrieving problems from Leetcode")
@@ -55,9 +63,10 @@ def main():
         exit(1)
     info("retrieved all problems")
     questions = problems.json()["data"]["problemsetQuestionList"]["questions"]
+    questions = list(filter(lambda q: q["questionFrontendId"] in to_sync, questions))
     for i in range(0, len(questions)):
         q = questions[i]
-        info(f"syncing question {i}")
+        info(f"Syncing question {q['questionFrontendId']}")
         title_slug = q["titleSlug"]
         title = q["title"]
         content = q["content"]
@@ -73,13 +82,17 @@ def main():
         submission_details = lc_api.get_submission_details(first_submission["id"]).json()["data"]["submissionDetails"]
         debug("submission_details", submission_details)
         runtime = submission_details["runtimeDisplay"]
-        runtime_faster_than = -1 if "runtimePercentile" not in submission_details or submission_details["runtimePercentile"] is None else round(submission_details["runtimePercentile"], 2)
+        runtime_faster_than = -1 if "runtimePercentile" not in submission_details or submission_details[
+            "runtimePercentile"] is None else round(submission_details["runtimePercentile"], 2)
         memory = submission_details["memoryDisplay"]
-        memory_less_than = -1 if "memoryPercentile" not in submission_details or submission_details["memoryPercentile"] is None else round(submission_details["memoryPercentile"], 2)
+        memory_less_than = -1 if "memoryPercentile" not in submission_details or submission_details[
+            "memoryPercentile"] is None else round(submission_details["memoryPercentile"], 2)
         code = submission_details["code"]
         lang_name = submission_details["lang"]["name"]
-        gh_api.upload_code(content, title_slug, title, question_frontend_id, runtime, runtime_faster_than, memory, memory_less_than, code, lang_name)
+        gh_api.upload_code(content, title_slug, title, question_frontend_id, runtime, runtime_faster_than, memory,
+                           memory_less_than, code, lang_name)
     info("done")
+
 
 if __name__ == "__main__":
     main()

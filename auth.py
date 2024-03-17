@@ -1,20 +1,23 @@
 from time import sleep
 from urllib.parse import parse_qs
 import requests
-from logger import set_logging, debug, info
 
-client_id = "5fbc80938f0fa9cebefa"
-client_secret = "bbec7dfe54df734011ece4d35f0ff4c510afad4b"
+import config
+from logger import set_logging, debug, info
 
 set_logging()
 
+
 def get_access_token():
+    client_id = config.github_app_client_id()
+    if config.github_access_token():
+        return config.github_access_token()
     auth_url = "https://github.com/login/device/code?scope=repo"
     auth_url_res = requests.post(auth_url, data={
         "client_id": client_id
     })
     auth_url_data = {
-        k: v[0] for k,v in parse_qs(auth_url_res.text).items()
+        k: v[0] for k, v in parse_qs(auth_url_res.text).items()
     }
 
     debug("auth_url_data", auth_url_data)
@@ -31,7 +34,7 @@ def get_access_token():
 
     access_token_res = requests.post(url=access_token_url, data=access_token_payload)
     access_token_data = {
-        k: v[0] for k,v in parse_qs(access_token_res.text).items()
+        k: v[0] for k, v in parse_qs(access_token_res.text).items()
     }
     debug("access_token_data", access_token_data)
 

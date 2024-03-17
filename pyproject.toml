@@ -1,0 +1,17 @@
+[project]
+name = "leetcode-github-sync"
+version = "1.0.0"
+description = "Sync leetcode submissions to github."
+authors = [
+    {name = "Alexander Medeiros", email = "ajmed13@gmail.com"},
+]
+dependencies = [
+    "requests==2.31.0",
+]
+requires-python = "==3.9.*"
+readme = "README.md"
+license = {text = "MIT"}
+
+
+[tool.pdm]
+distribution = false
